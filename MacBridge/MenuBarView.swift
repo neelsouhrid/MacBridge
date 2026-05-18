@@ -4,9 +4,11 @@ import ServiceManagement
 // MARK: - Menu Bar Popover View
 struct MenuBarView: View {
     @EnvironmentObject var commandLog: CommandLog
+    @AppStorage("ServerPort") private var savedPort: Int = 5001
     @State private var localIP: String = "Detecting..."
     @State private var launchAtLogin = false
     @State private var isHovering = false
+    @State private var portString: String = ""
 
     var body: some View {
         VStack(spacing: 0) {
@@ -23,6 +25,7 @@ struct MenuBarView: View {
         .onAppear {
             localIP = NetworkInfo.getLocalIPAddress() ?? "Not connected"
             launchAtLogin = SMAppService.mainApp.status == .enabled
+            portString = "\(savedPort)"
         }
     }
 
@@ -96,12 +99,7 @@ struct MenuBarView: View {
 
                 Divider().frame(height: 36).opacity(0.3)
 
-                infoCard(
-                    icon: "network",
-                    title: "Port",
-                    value: "\(commandLog.serverPort)",
-                    color: Color(hex: "764BA2")
-                )
+                editablePortCard
             }
             .background(Color.primary.opacity(0.04))
             .cornerRadius(8)
@@ -129,6 +127,35 @@ struct MenuBarView: View {
                     .font(.system(size: 12, weight: .semibold, design: .monospaced))
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+    }
+
+    private var editablePortCard: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "network")
+                .font(.system(size: 12))
+                .foregroundColor(Color(hex: "764BA2"))
+
+            VStack(alignment: .leading, spacing: 1) {
+                Text("Port (Enter to apply)")
+                    .font(.system(size: 9, weight: .medium))
+                    .foregroundColor(.secondary)
+                
+                TextField("Port", text: $portString)
+                    .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                    .textFieldStyle(.plain)
+                    .onSubmit {
+                        if let newPort = Int(portString), newPort > 1024, newPort <= 65535 {
+                            savedPort = newPort
+                            NotificationCenter.default.post(name: NSNotification.Name("RestartServerNotification"), object: nil)
+                        } else {
+                            portString = "\(savedPort)" // revert if invalid
+                        }
+                    }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

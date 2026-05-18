@@ -51,7 +51,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Server
 
     private func startServer() {
-        httpServer = MacBridgeHTTPServer()
+        let savedPort = UserDefaults.standard.integer(forKey: "ServerPort")
+        let portToUse: UInt16 = savedPort > 0 ? UInt16(savedPort) : 5001
+        
+        httpServer = MacBridgeHTTPServer(port: portToUse)
+        httpServer?.start()
+        
+        NotificationCenter.default.addObserver(forName: NSNotification.Name("RestartServerNotification"), object: nil, queue: .main) { [weak self] _ in
+            self?.restartServer()
+        }
+    }
+    
+    private func restartServer() {
+        httpServer?.stop()
+        let savedPort = UserDefaults.standard.integer(forKey: "ServerPort")
+        let portToUse: UInt16 = savedPort > 0 ? UInt16(savedPort) : 5001
+        httpServer = MacBridgeHTTPServer(port: portToUse)
         httpServer?.start()
     }
 }
