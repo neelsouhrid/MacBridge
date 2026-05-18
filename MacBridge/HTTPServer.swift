@@ -1,5 +1,6 @@
 import Foundation
 import Swifter
+import AppKit
 
 // MARK: - HTTP Server (Swifter-based)
 class MacBridgeHTTPServer {
@@ -133,6 +134,98 @@ class MacBridgeHTTPServer {
                 _ = AppleScriptRunner.sleep()
             }
             return .ok(.json(["status": "ok", "action": "sleep"] as AnyObject))
+        }
+
+        // ── GET /quit?app=AppName ──────────────────────────────────
+        server["/quit"] = { request in
+            let params = self.queryDict(request)
+            guard let appName = params["app"] else {
+                return .badRequest(.text("Missing 'app' parameter"))
+            }
+
+            let workspace = NSWorkspace.shared
+            let apps = workspace.runningApplications.filter { $0.localizedName?.caseInsensitiveCompare(appName) == .orderedSame }
+
+            guard let app = apps.first else {
+                self.logCommand("/quit", params: "app=\(appName)", success: false)
+                return .raw(404, "Not Found", ["Content-Type": "application/json"]) { writer in
+                    let body: [String: Any] = ["status": "error", "message": "App not found"]
+                    if let data = try? JSONSerialization.data(withJSONObject: body) {
+                        try writer.write(data)
+                    }
+                }
+            }
+
+            app.terminate()
+            DispatchQueue.global().asyncAfter(deadline: .now() + 2.0) {
+                if !app.isTerminated {
+                    app.forceTerminate()
+                }
+            }
+
+            self.logCommand("/quit", params: "app=\(appName)", success: true)
+            return .ok(.json(["status": "ok", "message": "Quit \(appName)"] as AnyObject))
+        }
+
+        // ── GET /launch?app=AppName ────────────────────────────────
+        server["/launch"] = { request in
+            let params = self.queryDict(request)
+            guard let appName = params["app"] else {
+                return .badRequest(.text("Missing 'app' parameter"))
+            }
+
+            let result = BrightnessVolume.shell("/usr/bin/open", "-a", appName)
+            let success = result.status == 0
+
+            self.logCommand("/launch", params: "app=\(appName)", success: success)
+
+            if success {
+                return .ok(.json(["status": "ok", "message": "Launched \(appName)"] as AnyObject))
+            } else {
+                return self.errorResponse("Failed to launch \(appName): \(result.output)")
+            }
+        }
+
+        // ── GET /search?q=Query ────────────────────────────────────
+        server["/search"] = { request in
+            let params = self.queryDict(request)
+            let query = params["q"]?.lowercased() ?? ""
+
+            let directories = [
+                "/Applications",
+                "/Applications/Utilities",
+                "/System/Applications",
+                "/System/Applications/Utilities",
+                FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Applications").path
+            ]
+
+            var appNames = Set<String>()
+            let fm = FileManager.default
+
+            for dir in directories {
+                guard let contents = try? fm.contentsOfDirectory(atPath: dir) else { continue }
+                for item in contents {
+                    if item.hasSuffix(".app") {
+                        let name = item.replacingOccurrences(of: ".app", with: "")
+                        if query.isEmpty || name.lowercased().contains(query) {
+                            appNames.insert(name)
+                        }
+                    }
+                }
+            }
+
+            let sortedApps = Array(appNames).sorted()
+            self.logCommand("/search", params: "q=\(query)", success: true)
+
+            // Return plain JSON string array
+            do {
+                let data = try JSONSerialization.data(withJSONObject: sortedApps)
+                return .raw(200, "OK", ["Content-Type": "application/json"]) { writer in
+                    try writer.write(data)
+                }
+            } catch {
+                return self.errorResponse("Failed to serialize apps")
+            }
         }
     }
 
