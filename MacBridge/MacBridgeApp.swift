@@ -1,17 +1,17 @@
-//
-//  MacBridgeApp.swift
-//  MacBridge
-//
-//  Created by Souhrid Pal on 18/05/26.
-//
-
 import SwiftUI
 
+// MARK: - App Entry Point
 @main
 struct MacBridgeApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
     var body: some Scene {
-        WindowGroup {
-            ContentView()
+        MenuBarExtra {
+            MenuBarView()
+                .environmentObject(CommandLog.shared)
+        } label: {
+            Label("MacBridge", systemImage: "antenna.radiowaves.left.and.right")
         }
+        .menuBarExtraStyle(.window)
     }
 }
