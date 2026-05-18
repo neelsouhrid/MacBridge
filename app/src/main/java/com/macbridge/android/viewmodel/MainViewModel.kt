@@ -250,4 +250,110 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             )
         }
     }
+
+    // ── App to quit (for long-press dialog) ──
+    private val _appToQuit = MutableStateFlow<String?>(null)
+    val appToQuit: StateFlow<String?> = _appToQuit.asStateFlow()
+
+    fun showQuitDialog(appName: String) {
+        _appToQuit.value = appName
+    }
+
+    fun dismissQuitDialog() {
+        _appToQuit.value = null
+    }
+
+    /**
+     * Quit an app by name.
+     */
+    fun quitApp(appName: String) {
+        _appToQuit.value = null
+        viewModelScope.launch {
+            val result = repository.quitApp(appName)
+            result.fold(
+                onSuccess = {
+                    _snackbarMessage.value = "Quit $appName"
+                    // Refresh app list after quitting
+                    delay(500)
+                    refreshApps()
+                },
+                onFailure = { error ->
+                    _snackbarMessage.value = "Quit failed: ${error.localizedMessage}"
+                }
+            )
+        }
+    }
+
+    // ── Search state ──
+    private val _isSearchOpen = MutableStateFlow(false)
+    val isSearchOpen: StateFlow<Boolean> = _isSearchOpen.asStateFlow()
+
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    private val _searchResults = MutableStateFlow<List<String>>(emptyList())
+    val searchResults: StateFlow<List<String>> = _searchResults.asStateFlow()
+
+    private val _isSearching = MutableStateFlow(false)
+    val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
+
+    fun openSearch() {
+        _isSearchOpen.value = true
+        _searchQuery.value = ""
+        _searchResults.value = emptyList()
+    }
+
+    fun closeSearch() {
+        _isSearchOpen.value = false
+        _searchQuery.value = ""
+        _searchResults.value = emptyList()
+    }
+
+    private var searchJob: Job? = null
+
+    fun updateSearchQuery(query: String) {
+        _searchQuery.value = query
+        if (query.length < 2) {
+            _searchResults.value = emptyList()
+            return
+        }
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            delay(300)
+            _isSearching.value = true
+            val result = repository.searchApps(query)
+            result.fold(
+                onSuccess = { appNames ->
+                    _searchResults.value = appNames
+                },
+                onFailure = {
+                    _searchResults.value = emptyList()
+                }
+            )
+            _isSearching.value = false
+        }
+    }
+
+    /**
+     * Launch an app by name.
+     */
+    fun launchApp(appName: String) {
+        _isSearchOpen.value = false
+        _searchQuery.value = ""
+        _searchResults.value = emptyList()
+        viewModelScope.launch {
+            val result = repository.launchApp(appName)
+            result.fold(
+                onSuccess = {
+                    _snackbarMessage.value = "Launched $appName"
+                    delay(1000)
+                    refreshApps()
+                },
+                onFailure = { error ->
+                    _snackbarMessage.value = "Launch failed: ${error.localizedMessage}"
+                }
+            )
+        }
+    }
 }
+

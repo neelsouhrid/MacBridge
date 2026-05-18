@@ -11,6 +11,8 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.OpenInNew
@@ -46,11 +48,13 @@ private val cardGradients = listOf(
  * Shows the app icon, name, and expand button for multi-window apps.
  * Features a scale animation on press for tactile feedback.
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AppCard(
     appInfo: AppInfo,
     isExpanded: Boolean,
     onTap: () -> Unit,
+    onLongPress: () -> Unit,
     onWindowTap: (String) -> Unit,
     onToggleExpand: () -> Unit,
     index: Int,
@@ -85,16 +89,18 @@ fun AppCard(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable(
+                .combinedClickable(
                     interactionSource = interactionSource,
-                    indication = null
-                ) {
-                    if (hasMultipleWindows) {
-                        onToggleExpand()
-                    } else {
-                        onTap()
+                    indication = null,
+                    onLongClick = { onLongPress() },
+                    onClick = {
+                        if (hasMultipleWindows) {
+                            onToggleExpand()
+                        } else {
+                            onTap()
+                        }
                     }
-                },
+                ),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = Color.Transparent),
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)

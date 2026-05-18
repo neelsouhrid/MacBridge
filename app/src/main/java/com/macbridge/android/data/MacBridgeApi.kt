@@ -45,4 +45,22 @@ interface MacBridgeApi {
     /** Put Mac to sleep */
     @GET("/sleep")
     suspend fun sleep(): ApiResponse
+
+    /** Quit an app */
+    @GET("/quit")
+    suspend fun quitApp(
+        @Query("app") app: String
+    ): ApiResponse
+
+    /** Launch an app (used for search) */
+    @GET("/launch")
+    suspend fun launchApp(
+        @Query("app") app: String
+    ): ApiResponse
+
+    /** Search installed apps by name */
+    @GET("/search")
+    suspend fun searchApps(
+        @Query("q") query: String
+    ): List<String>
 }

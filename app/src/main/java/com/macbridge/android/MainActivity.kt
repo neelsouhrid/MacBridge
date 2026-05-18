@@ -46,6 +46,11 @@ fun MacBridgeApp(viewModel: MainViewModel = viewModel()) {
     val brightnessLevel by viewModel.brightnessLevel.collectAsState()
     val isMuted by viewModel.isMuted.collectAsState()
     val expandedApp by viewModel.expandedApp.collectAsState()
+    val appToQuit by viewModel.appToQuit.collectAsState()
+    val isSearchOpen by viewModel.isSearchOpen.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
+    val searchResults by viewModel.searchResults.collectAsState()
+    val isSearching by viewModel.isSearching.collectAsState()
     val snackbarMessage by viewModel.snackbarMessage.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -125,15 +130,27 @@ fun MacBridgeApp(viewModel: MainViewModel = viewModel()) {
                         brightnessLevel = brightnessLevel,
                         isMuted = isMuted,
                         expandedApp = expandedApp,
+                        appToQuit = appToQuit,
+                        isSearchOpen = isSearchOpen,
+                        searchQuery = searchQuery,
+                        searchResults = searchResults,
+                        isSearching = isSearching,
                         onRefresh = viewModel::refreshApps,
                         onAppTap = { appName -> viewModel.switchApp(appName) },
+                        onAppLongPress = viewModel::showQuitDialog,
                         onWindowTap = { appName, window -> viewModel.switchApp(appName, window) },
                         onToggleExpand = viewModel::toggleExpandedApp,
                         onVolumeChange = viewModel::setVolume,
                         onBrightnessChange = viewModel::setBrightness,
                         onMuteToggle = viewModel::toggleMute,
                         onSleep = viewModel::sleepMac,
-                        onDisconnect = viewModel::disconnect
+                        onDisconnect = viewModel::disconnect,
+                        onQuitConfirm = viewModel::quitApp,
+                        onQuitDismiss = viewModel::dismissQuitDialog,
+                        onSearchOpen = viewModel::openSearch,
+                        onSearchClose = viewModel::closeSearch,
+                        onSearchQueryChange = viewModel::updateSearchQuery,
+                        onLaunchApp = viewModel::launchApp
                     )
                 } else {
                     OnboardingScreen(

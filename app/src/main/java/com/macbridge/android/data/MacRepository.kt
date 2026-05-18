@@ -84,4 +84,19 @@ class MacRepository {
     suspend fun sleep(): Result<ApiResponse> = runCatching {
         requireApi().sleep()
     }
+
+    /** Quit an app by name */
+    suspend fun quitApp(app: String): Result<ApiResponse> = runCatching {
+        requireApi().quitApp(app)
+    }
+
+    /** Launch an app by name */
+    suspend fun launchApp(app: String): Result<ApiResponse> = runCatching {
+        requireApi().launchApp(app)
+    }
+
+    /** Search installed apps by name */
+    suspend fun searchApps(query: String): Result<List<String>> = runCatching {
+        requireApi().searchApps(query)
+    }
 }
