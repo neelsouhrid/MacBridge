@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Outer ring -->
+    <path
+        android:pathData="M54,54m-24,0a24,24 0,1 1,48 0a24,24 0,1 1,-48 0"
+        android:strokeWidth="2"
+        android:strokeColor="#7B8CDE"
+        android:fillColor="#00000000"/>
+
+    <!-- Center hub dot -->
+    <path
+        android:pathData="M54,54m-6,0a6,6 0,1 1,12 0a6,6 0,1 1,-12 0"
+        android:fillColor="#7B8CDE"/>
+
+    <!-- Bridge lines (radiating from center) -->
+    <!-- Top -->
+    <path
+        android:pathData="M54,48L54,30"
+        android:strokeWidth="2.5"
+        android:strokeColor="#9AADFF"
+        android:fillColor="#00000000"
+        android:strokeLineCap="round"/>
+
+    <!-- Bottom -->
+    <path
+        android:pathData="M54,60L54,78"
+        android:strokeWidth="2.5"
+        android:strokeColor="#9AADFF"
+        android:fillColor="#00000000"
+        android:strokeLineCap="round"/>
+
+    <!-- Left -->
+    <path
+        android:pathData="M48,54L30,54"
+        android:strokeWidth="2.5"
+        android:strokeColor="#9AADFF"
+        android:fillColor="#00000000"
+        android:strokeLineCap="round"/>
+
+    <!-- Right -->
+    <path
+        android:pathData="M60,54L78,54"
+        android:strokeWidth="2.5"
+        android:strokeColor="#9AADFF"
+        android:fillColor="#00000000"
+        android:strokeLineCap="round"/>
+
+    <!-- Diagonal top-left -->
+    <path
+        android:pathData="M49.76,49.76L37.03,37.03"
+        android:strokeWidth="1.8"
+        android:strokeColor="#7B8CDE"
+        android:fillColor="#00000000"
+        android:strokeLineCap="round"/>
+
+    <!-- Diagonal top-right -->
+    <path
+        android:pathData="M58.24,49.76L70.97,37.03"
+        android:strokeWidth="1.8"
+        android:strokeColor="#7B8CDE"
+        android:fillColor="#00000000"
+        android:strokeLineCap="round"/>
+
+    <!-- Diagonal bottom-left -->
+    <path
+        android:pathData="M49.76,58.24L37.03,70.97"
+        android:strokeWidth="1.8"
+        android:strokeColor="#7B8CDE"
+        android:fillColor="#00000000"
+        android:strokeLineCap="round"/>
+
+    <!-- Diagonal bottom-right -->
+    <path
+        android:pathData="M58.24,58.24L70.97,70.97"
+        android:strokeWidth="1.8"
+        android:strokeColor="#7B8CDE"
+        android:fillColor="#00000000"
+        android:strokeLineCap="round"/>
+
+    <!-- Outer endpoint dots -->
+    <path android:pathData="M54,30m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0" android:fillColor="#9AADFF"/>
+    <path android:pathData="M54,78m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0" android:fillColor="#9AADFF"/>
+    <path android:pathData="M30,54m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0" android:fillColor="#9AADFF"/>
+    <path android:pathData="M78,54m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0" android:fillColor="#9AADFF"/>
+
+</vector>
